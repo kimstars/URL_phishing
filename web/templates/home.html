@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/app.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+
+<body>
+  <div class="container">
+    <nav>
+      <h3 class="text-center">DETECT URL</h3>
+    </nav>
+    <div class="d-flex justify-content-between" style="width: 100%; margin-top: 60px;">
+      <form action="/get_url" method="POST" class="detect-url-form" enctype="multipart/form-data">
+        <div class="group" style="width: 70%">
+          <input type="text" id="url-text" name="text_url">
+          <span class="highlight"></span>
+          <span class="bar"></span>
+          <label id="input-text-label">URL</label>
+        </div>
+        <div class="group d-flex" style="width:70%">
+          <input type="file" name="file" id="file-url-input">
+          <div id="fileName">Select a file</div>
+          <label for="file-url-input" id="file-upload-label">Upload</label>
+        </div>
+        <button type="button" class="btn btn-sm btn-custom btn-submit"
+          style="background-color: #2bc48a; color: #fff;">Check</button>
+        <button type="reset" class="btn btn-sm btn-warning btn-custom btn-reset">Reset</button>
+      </form>
+      <div class="result hidden">
+        <div class="d-flex justify-content-between" style="margin-bottom:80px;" id="result_wrap">
+
+        </div>
+        <!-- <div class="d-flex justify-content-evenly" style="width:70%">
+          <button class="btn btn-sm btn-success">Truy cập</button>
+          <button class="btn btn-sm btn-warning">Truy cập (Khi độc hại)</button>
+        </div> -->
+      </div>
+    </div>
+    <div class="hidden" style="margin-top: 70px;" id="statistic_wrap">
+      <div class="chart" style="width:47%">
+        <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+      </div>
+      <div class="table-responsive" style="width:47%">
+        <table class="table">
+          <thead class="table-success">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">URL</th>
+              <th scope="col">Last</th>
+            </tr>
+          </thead>
+          <tbody class="statistic_tb-bd">
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</body>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<script>
+  // show file name
+  $(function () {
+    $("#file-url-input").change(function (event) {
+      var x = event.target.files[0].name
+      $("#fileName").text(x)
+    });
+  })
+  // click reset button
+  $(".btn-reset").click(function () {
+    $("#fileName").empty().append("Select a file");
+  })
+
+  // set color result
+
+  $(".btn-submit").click(function (e) {
+    var input_text = $('#url-text');
+    if (input_text.val() == "") {
+      var form = $(".detect-url-form");
+      // you can't pass Jquery form it has to be javascript form object
+      var formData = new FormData(form[0]);
+      e.preventDefault();
+      $.ajax({
+        type: 'POST',
+        url: '/get_url',
+        enctype: 'multipart/form-data',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          if (data != null) {
+            $("#fileName").empty().append("Select a file");
+            $("#statistic_wrap").removeClass("hidden").addClass("display");
+            console.log($(".statistic_tb-bd"));
+            console.log(data);
+            var a = JSON.parse(data);
+            $.each(a, function (key, value) {
+              $(".statistic_tb-bd").append(
+                "<tr>" +
+                "<th scope='row'>" + (key + 1) + "</th>" +
+                "<td>" + value.url + "</td>" +
+                "<td class='tb-detect-result'>" + value.predict + "</td>" +
+                "</tr>"
+              );
+            });
+          } else {
+            console.log("no data");
+          }
+
+        }
+      }).then(function (respone) {
+        var dt_result = $(".tb-detect-result");
+        Array.from(dt_result).forEach(element => {
+          console.log(element.outerText);
+          switch (element.outerText) {
+            case "Độc hại":
+              element.style.color = "#000";
+              element.style.backgroundColor = "red"
+              break;
+            case "Bình thường":
+              element.style.color = "#000";
+              element.style.backgroundColor = "#ffc107";
+              break;
+            case "Tốt":
+              element.style.color = "#000";
+              element.style.backgroundColor = "#198754";
+              break;
+            default:
+              console.log("error");
+              break;
+          }
+        });
+      });
+    } else {
+      console.log(input_text.val());
+      $.ajax({
+        type: 'POST',
+        url: '/get_url',
+        data: {
+          'url': input_text.val()
+        },
+        success: function (data) {
+          console.log(data);
+          if (data != null) {
+            $("#url-text").empty();
+            $(".result").removeClass("hidden");
+            var a = JSON.parse(data);
+            $("#result_wrap").append(
+              "<div class='text-center url'>" + a.url + "</div>"+
+              "<div class='prop text-center'>" + a.predict + "</div>"+
+              "<p>An absolute URL: <a href=\"https://www.w3schools.com\">W3Schools</a></p>"+
+              "<p>A relative URL: <a href=\"tag_a.asp\">The a tag</a></p>"
+            )
+          }
+        }
+      }).then(function (response) {
+        var predict_txt = $(".prop").text();
+        console.log($(".prop"));
+        console.log(predict_txt);
+        switch (predict_txt) {
+          case "UNSAFE":
+            $(".prop").css('background-color', "red")
+            break;
+          case "UNSAFE":
+            $(".prop").css('background-color','#ffc107');
+            break;
+          case "SUSPICIOUS":
+            $(".prop").css('background-color','#198754');
+            break;
+          default:
+            console.log("error");
+            break;
+        };
+      })
+    }
+  })
+
+  // chart
+  var xValues = ["Malicious", "Normal", "Good"];
+  var yValues = [44, 24, 15];
+  var barColors = [
+    "#2b5797",
+    "#e8c3b9",
+    "#1e7145"
+  ];
+
+  new Chart("myChart", {
+    type: "pie",
+    data: {
+      labels: xValues,
+      datasets: [{
+        backgroundColor: barColors,
+        data: yValues
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: "Detect url chart"
+      }
+    }
+  });
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+  integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+  integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+
+</html>

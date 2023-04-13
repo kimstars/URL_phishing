@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+  </head>
+  <body>
+  <div id="msg">Loading page ...</div>
+  <br>
+
+  <jhanley-python>
+import js
+from js import document
+
+
+def main():
+  msg = document.getElementById("msg")
+  msg.innerHTML = 'Nguyễn Anh Dũng'
+
+main()
+  </jhanley-python>
+    <script type="text/javascript">
+        async function load_and_run_python_script() {
+                var tag = document.getElementsByTagName('jhanley-python');
+                // Hide the tag contents
+                tag[0].style.display = "none";
+
+                let pycode = tag[0].innerHTML;
+
+                let pyodide = await loadPyodide();
+
+                pyodide.runPython(pycode);
+        }
+
+        load_and_run_python_script();
+
+    </script>
+  </body>
+</html>

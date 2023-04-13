@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Example 1</title>
+  <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+</head>
+
+<body>
+  <div id="msg">Loading page ...</div>
+  <br>
+
+  <py-script>
+
+import js
+from js import document
+
+def main():
+  msg = document.getElementById("msg")
+  msg.innerHTML = 'Hello world'
+
+main()
+
+  </py-script>
+</body>
+</html>

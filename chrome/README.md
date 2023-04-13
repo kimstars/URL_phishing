@@ -1,0 +1,24 @@
+# Malicious Web Content Detection using Machine Learning
+
+#### NOTE - 
+#### 1. If you face any issue, first refer to [Troubleshooting.md](docs/Troubleshooting.md). If you are still not able to resolve it, please file an issue with the appropriate template (Bug report, question, custom issue or feature request).
+#### 2. Please support the project by starring it :)
+
+### Steps for reproducing the project -
+* Install all the required packages using the following command - ```pip install -r requirements.txt```.
+Make sure your pip is consistent with the Python version you are using by typing ```pip -V```.
+* Move the project folder to the correct localhost location. For eg. ```/Library/WebServer/Documents``` in case of Macs.
+* (If you are using a Mac) Give permissions to write to the markup file ```sudo chmod 777 markup.txt```.
+* Modify the path of your Python 2.x installation in ```clientServer.php```.
+* (If you are using **anything other than** a Mac) Modify the localhost path in ```features_extraction.py``` to your localhost path (or host the application on a remote server and make the necessary changes).
+* Go to ```chrome://extensions```, activate developer mode, click on load unpacked and select the 'Extension' folder from our project.
+* Now, you can go to any web page and click on the extension in the top right panel of your Chrome window. Click on the 'Safe of not?' button and wait for a second for the result.
+* Done!
+
+#### Abstract -
+* Naive users using a browser have no idea about the back-end of the page. The users might be tricked into giving away their credentials or downloading malicious data.
+* Our aim is to create an extension for Chrome which will act as middleware between the users and the malicious websites, and mitigate the risk of users succumbing to such websites.
+* Further, all harmful content cannot be exhaustively collected as even that is bound to continuous development. To counter this we are using machine learning - to train the tool and categorize the new content it sees every time into the particular categories so that corresponding action can be taken.
+
+
+
