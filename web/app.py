@@ -28,24 +28,24 @@ from werkzeug.utils import secure_filename
 
 # Ramdonforest
 
-with open("static\model_rf.pkl", 'rb') as file:
+with open("static/model_rf.pkl", 'rb') as file:
     rf = pickle.load(file)
 
 # One class support vector machines
 # One class support vector machines
 # sacle
 
-sc = pickle.load(open('static\scale_ocsvm.pkl','rb'))
+sc = pickle.load(open('static/scale_ocsvm.pkl','rb'))
 
 #autoencoder
 
 # load the model from file
 
-encoder = load_model('static\encoder14.h5')
+encoder = load_model('static/encoder.h5')
 
 
 # load the model ocsvm
-clf = pickle.load(open('static\model_ocsvm_ae.pkl', 'rb'))
+clf = pickle.load(open('static/model_ocsvm_ae.pkl', 'rb'))
 
 
 
@@ -53,7 +53,7 @@ clf = pickle.load(open('static\model_ocsvm_ae.pkl', 'rb'))
 
 
 #Blacklist
-f = open('static\\blacklist.json',encoding="utf8")
+f = open('static/blacklist.json',encoding="utf8")
 
 json_object = json.load(f)
 
@@ -63,7 +63,7 @@ df.drop(['_id', 'type', 'level', 'created'], axis=1, inplace=True)
 df['url']= df['url'].apply(lambda i: i.split("//")[-1].replace('*','').rstrip("/").strip("."))
 
 #Whitelist
-f_white = open('static\whitelist.json',encoding="utf8")
+f_white = open('static/whitelist.json',encoding="utf8")
 
 json_object_white = json.load(f_white)
 
@@ -76,26 +76,33 @@ df_white['url']= df_white['url'].apply(lambda i: i.split("//")[-1].replace('*','
 # URL model
 def url_model(url):
     #Blacklist
+    print("kiet oi =>>>>>>>>>>>>>>>>>>>> chay den day")
     for i in range(len(df)):
         if url.find(df['url'].iloc[i]) != -1:
+            print("May chet !!! Blacklist nhe")
             return 1
 
     #Whitelist
     for i in range(len(df_white)):
         if url.find(df_white['url'].iloc[i]) != -1:
+            print("trong whitelist roi ong chau oi!!!")
             return 0 
 
+    print("ko co trong rule1")
     url_features = generate_features(url) # Extracting features
+    print("ko co trong rule2")
     sacle_ = sc.fit_transform(url_features) # scale
+    print("ko co trong rule3")
     ae_ = encoder.predict(sacle_) # autoencoder
 
-
+    print("done input ae")
     try:
         # RandomForest
         rf_ = rf.predict(ae_)[0] 
+        print("ok random forest !!!")
         # one class support vector machines
         ocsvm_ = clf.predict(ae_)[0] 
-
+        print("ok one class")
         if ocsvm_ == 1 and rf_ == 1:
             return 1
         elif ocsvm_ == 0 and rf_ == 0:
@@ -130,6 +137,7 @@ def get_url():
     try:
         if request.method == 'POST':
             text_url = request.values.get('url')
+            print("co dua test => ", text_url)
             if text_url != None:
                 # xử lý detect url
                 # ...
@@ -149,7 +157,7 @@ def get_url():
                 }
                 return json.dumps(data, ensure_ascii=False)
     except Exception as e:
-        print("\tError", e)
+        print("\tError ne kiet", e)
         return redirect(url_for('index'))
     return redirect(url_for('index'))
 
@@ -279,6 +287,7 @@ def url():
     if request.method == "POST":
         url_request = request.args.get('url')
         #xử lý detect url
+        print("co dua test ==>", url_request)
         temp_url = url_model(url_request)
 
         if temp_url == 1:
@@ -296,4 +305,4 @@ def url():
     return url_request
 
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=3400, debug=True)

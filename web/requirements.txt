@@ -6,8 +6,11 @@ pandas
 python_dateutil
 requests
 scikit_learn
-whois
+python-whois
 gunicorn
 pyquery
 waybackpy==2.4.4
 shodan
+keras-models
+tensorflow
+Flask-Pusher
